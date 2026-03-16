@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Sorting Algorithms — Unique Visualizations</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0c1020;--s1:#111827;--s2:#1a2235;--bdr:#243050;
+  --tx:#c9d5e8;--dim:#506080;--acc:#7c6fe0;--acc2:#00c9a7;
+  --blue:#4f7ef7;--green:#22c55e;--red:#ef4444;--amber:#f59e0b;
+  --pink:#ec4899;--purple:#a855f7;--teal:#14b8a6;--orange:#f97316
+}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--tx);font-size:14px;overflow-x:hidden}
+
+/* HEADER */
+.hdr{background:linear-gradient(135deg,#14192e,var(--bg));border-bottom:1px solid var(--bdr);padding:1rem 1rem;text-align:center}
+.hdr h1{font-size:clamp(1.2rem,4vw,1.6rem);font-weight:800;background:linear-gradient(90deg,var(--acc),var(--acc2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hdr p{color:var(--dim);font-size:.7rem;margin-top:.15rem}
+
+/* TABS */
+.tabs{background:var(--s1);border-bottom:1px solid var(--bdr);overflow-x:auto;position:sticky;top:0;z-index:50;scrollbar-width:thin;-webkit-overflow-scrolling:touch}
+.tabs-in{display:flex;min-width:max-content;padding:0 .25rem}
+.tab{padding:.5rem .65rem;cursor:pointer;font-size:.62rem;font-weight:700;color:var(--dim);border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;text-transform:uppercase;letter-spacing:.4px;user-select:none}
+.tab:hover{color:var(--tx)}.tab.on{color:var(--acc);border-color:var(--acc)}
+
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:260px 1fr;min-height:calc(100vh - 95px)}
+@media(max-width:700px){.layout{grid-template-columns:1fr}}
+
+/* INFO */
+.info{background:var(--s1);border-right:1px solid var(--bdr);padding:.85rem;overflow-y:auto;position:sticky;top:35px;max-height:calc(100vh - 35px)}
+@media(max-width:700px){.info{position:static;max-height:none;border-right:none;border-bottom:1px solid var(--bdr)}}
+.aname{font-size:1rem;font-weight:700;margin-bottom:.15rem}
+.abadge{font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--acc);background:rgba(124,111,224,.1);border:1px solid rgba(124,111,224,.25);border-radius:4px;padding:.1rem .35rem;display:inline-block;margin-bottom:.55rem}
+.cmpl{display:grid;grid-template-columns:repeat(3,1fr);gap:.25rem;margin-bottom:.55rem}
+.cc{background:var(--s2);border:1px solid var(--bdr);border-radius:5px;padding:.3rem;text-align:center}
+.clb{font-size:.54rem;color:var(--dim);text-transform:uppercase;letter-spacing:.4px}
+.cv{font-size:.68rem;font-family:monospace;font-weight:700;color:var(--acc2);margin-top:1px}
+.sec{font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--dim);margin:.6rem 0 .25rem}
+.adesc{font-size:.76rem;line-height:1.65}
+ol.hw{list-style:none;counter-reset:s}
+ol.hw li{counter-increment:s;display:flex;gap:.4rem;font-size:.74rem;line-height:1.55;margin-bottom:.35rem}
+ol.hw li::before{content:counter(s);min-width:16px;height:16px;border-radius:50%;background:var(--acc);color:#fff;font-size:.58rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.keynote{background:var(--s2);border-left:3px solid var(--acc2);border-radius:0 5px 5px 0;padding:.4rem .65rem;font-size:.73rem;line-height:1.6;margin-top:.35rem}
+
+/* DEMO */
+.demo{padding:.85rem;overflow-y:auto;min-width:0}
+.ex-row{display:flex;align-items:center;gap:.3rem;flex-wrap:wrap;margin-bottom:.65rem}
+.exlbl{font-size:.65rem;color:var(--dim);font-weight:600;white-space:nowrap}
+.ebtn{padding:.22rem .55rem;border-radius:5px;border:1px solid var(--bdr);background:var(--s2);color:var(--dim);font-size:.65rem;cursor:pointer;transition:all .13s;white-space:nowrap}
+.ebtn:hover{border-color:var(--acc)}.ebtn.on{background:var(--acc);border-color:var(--acc);color:#fff}
+
+.viz-box{background:var(--s1);border:1px solid var(--bdr);border-radius:9px;padding:.85rem;margin-bottom:.65rem;min-height:160px;overflow-x:auto}
+.step-txt{background:var(--s1);border:1px solid var(--bdr);border-left:3px solid var(--acc);border-radius:6px;padding:.55rem .8rem;font-size:.78rem;line-height:1.65;min-height:42px;margin-bottom:.5rem;font-family:monospace;color:var(--tx);word-break:break-word}
+
+.prog{display:flex;align-items:center;gap:.35rem;margin-bottom:.45rem}
+.plbl{font-size:.63rem;color:var(--dim);white-space:nowrap}
+.ptrack{flex:1;height:3px;background:var(--bdr);border-radius:2px}
+.pfill{height:100%;background:linear-gradient(90deg,var(--acc),var(--acc2));border-radius:2px;transition:width .2s}
+
+.ctrls{display:flex;gap:.3rem;align-items:center;justify-content:center;flex-wrap:wrap}
+.btn{padding:.35rem .75rem;border-radius:6px;border:1px solid var(--bdr);background:var(--s2);color:var(--tx);font-size:.72rem;cursor:pointer;transition:all .15s;font-weight:500;min-height:32px}
+.btn:hover{border-color:var(--acc)}.btn.pri{background:var(--acc);border-color:var(--acc);color:#fff}.btn.pri:hover{background:#6358c5}.btn:disabled{opacity:.3;cursor:not-allowed}
+.spd{display:flex;align-items:center;gap:.3rem;font-size:.63rem;color:var(--dim)}
+.spd input{width:55px;accent-color:var(--acc)}
+
+/* SHARED ELEMENT STYLES */
+.el{display:inline-flex;align-items:center;justify-content:center;border-radius:5px;border:1.5px solid var(--bdr);background:var(--s2);font-family:monospace;font-weight:700;transition:all .12s;color:var(--tx)}
+.el.cmp{border-color:var(--amber);color:var(--amber);background:rgba(245,158,11,.12)}
+.el.swp{border-color:var(--red);color:var(--red);background:rgba(239,68,68,.12)}
+.el.srt{border-color:var(--green);color:var(--green);background:rgba(34,197,94,.1)}
+.el.pvt{border-color:var(--pink);color:var(--pink);background:rgba(236,72,153,.12)}
+.el.key{border-color:var(--acc);color:var(--acc);background:rgba(124,111,224,.15)}
+.el.put{border-color:var(--teal);color:var(--teal);background:rgba(20,184,166,.1)}
+.el.min{border-color:var(--orange);color:var(--orange);background:rgba(249,115,22,.12)}
+
+/* LEGEND */
+.lgd{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.5rem;padding-top:.5rem;border-top:1px solid var(--bdr)}
+.li{display:flex;align-items:center;gap:.25rem;font-size:.6rem;color:var(--dim)}
+.ld{width:9px;height:9px;border-radius:2px;flex-shrink:0}
+
+/* BUBBLE bars */
+.bars-wrap{display:flex;align-items:flex-end;gap:3px;height:120px}
+.bar-col{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;flex:1;gap:2px;height:100%}
+.bar-body{width:100%;border-radius:3px 3px 0 0;min-height:4px;transition:all .15s}
+.bar-val{font-size:.58rem;font-family:monospace;color:var(--dim);line-height:1}
+.arr-row{display:flex;gap:3px;flex-wrap:wrap;margin-top:5px;padding-top:5px;border-top:1px solid var(--bdr)}
+
+/* SELECTION */
+.sel-el{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:6px;border:2px solid var(--bdr);background:var(--s2);font-family:monospace;font-size:.9rem;font-weight:700;transition:all .13s;color:var(--tx);flex-shrink:0}
+.sel-el.srt{border-color:var(--green);color:var(--green);background:rgba(34,197,94,.1)}
+.sel-el.swp{border-color:var(--red);color:var(--red);background:rgba(239,68,68,.12)}
+.sel-el.min{border-color:var(--orange);color:var(--orange);background:rgba(249,115,22,.15)}
+.sel-el.cmp{border-color:var(--amber);color:var(--amber);background:rgba(245,158,11,.12)}
+.sel-ptr{display:flex;align-items:flex-start;gap:3px;margin-top:4px}
+.sel-ptr-cell{width:38px;flex-shrink:0;text-align:center;font-size:.6rem;font-weight:700;line-height:1.2;min-height:16px}
+
+/* INSERTION cards */
+.ins-wrap{display:flex;gap:.6rem;align-items:flex-start;flex-wrap:wrap}
+.ins-section{flex:1;min-width:100px}
+.ins-title{font-size:.6rem;color:var(--dim);text-transform:uppercase;letter-spacing:.4px;margin-bottom:.35rem}
+.card{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;min-width:32px;height:40px;padding:0 5px;border-radius:6px;font-family:monospace;font-size:.82rem;font-weight:700;transition:all .12s;margin:2px;border:2px solid var(--bdr)}
+.card.sorted{background:rgba(34,197,94,.08);border-color:var(--green);color:var(--green)}
+.card.shift{background:rgba(245,158,11,.1);border-color:var(--amber);color:var(--amber)}
+.card.keyed{background:rgba(124,111,224,.15);border-color:var(--acc);color:var(--acc)}
+.card.deck{background:var(--s2);border-color:var(--bdr);color:var(--dim)}
+
+/* SHELL groups */
+.shell-gap-label{font-size:.62rem;color:var(--acc2);font-weight:700;margin-bottom:4px}
+
+/* MERGE tree */
+.merge-levels{display:flex;flex-direction:column;gap:5px}
+.merge-level-row{display:flex;flex-wrap:wrap;gap:4px;align-items:center;justify-content:center;padding:4px 0}
+.merge-seg-box{display:flex;gap:2px;padding:3px 5px;border:1.5px solid var(--bdr);border-radius:6px;background:var(--s2);align-items:center;flex-wrap:wrap}
+.merge-seg-box.split-active{border-color:var(--blue);background:rgba(79,126,247,.07)}
+.merge-seg-box.merging{border-color:var(--amber);background:rgba(245,158,11,.07)}
+.merge-seg-box.merged{border-color:var(--green);background:rgba(34,197,94,.07)}
+.merge-level-lbl{font-size:.58rem;color:var(--dim);text-align:center;margin:1px 0}
+
+/* QUICK zones */
+.qk-zone{display:flex;gap:3px;padding:5px 7px;border:1.5px solid var(--bdr);border-radius:6px;background:var(--s2);flex-wrap:wrap;min-width:30px;min-height:34px;align-items:center}
+.qk-zone.left-z{border-color:var(--blue);background:rgba(79,126,247,.06)}
+.qk-zone.pvt-z{border-color:var(--pink);background:rgba(236,72,153,.1)}
+.qk-zone.right-z{border-color:var(--orange);background:rgba(249,115,22,.06)}
+
+/* HEAP tree svg */
+.heap-svg-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+/* COUNTING */
+.cnt-vars{display:flex;gap:.6rem;margin-bottom:.55rem;flex-wrap:wrap}
+.cnt-var{padding:.2rem .5rem;border-radius:5px;background:var(--s2);border:1px solid var(--bdr);font-family:monospace;font-size:.75rem;font-weight:700}
+.cnt-var .vname{color:var(--acc2)}.cnt-var .veq{color:var(--dim)}.cnt-var .vval{color:var(--amber)}
+.tally-wrap{display:flex;gap:5px;align-items:flex-end;flex-wrap:wrap}
+.tally-col{display:flex;flex-direction:column;align-items:center;gap:1px}
+.tally-bar-body{width:26px;border-radius:3px 3px 0 0;min-height:3px;transition:all .15s}
+.tally-num{font-size:.62rem;font-family:monospace;font-weight:700;color:var(--tx)}
+.tally-idx{font-size:.56rem;color:var(--dim)}
+.out-grid{display:flex;gap:3px;flex-wrap:wrap;padding:5px 7px;border:1.5px solid var(--bdr);border-radius:7px;background:var(--s2);min-height:38px}
+.out-empty{width:30px;height:28px;border:1px dashed var(--bdr);border-radius:4px;display:flex;align-items:center;justify-content:center;color:var(--dim);font-size:.65rem}
+
+/* BUCKET */
+.bucket-container{border:2px solid;border-radius:7px;padding:4px;display:flex;flex-direction:column;gap:2px;background:var(--s2);align-items:center;min-width:44px;transition:all .13s}
+.bucket-item{min-width:28px;height:24px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:.72rem;font-weight:700}
+
+/* RADIX */
+.radix-vars{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.5rem}
+.radix-var{padding:.18rem .45rem;border-radius:4px;background:var(--s2);border:1px solid var(--bdr);font-family:monospace;font-size:.72rem;font-weight:700}
+.dbkt-hdr{width:28px;height:20px;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.62rem;font-weight:700}
+.dbkt-item{min-width:26px;height:22px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:.64rem;font-weight:700;border:1px solid}
+.digit-box{display:flex;flex-direction:column;align-items:center;padding:3px 5px;border:1.5px solid var(--bdr);border-radius:5px;background:var(--s2);font-family:monospace;font-size:.75rem;font-weight:700;transition:all .12s;line-height:1.4}
+.dig-hl{color:var(--amber);font-size:.85rem}
+.dig-other{color:var(--dim);font-size:.72rem}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <h1>Sorting Algorithms</h1>
+  <p>10 algorithms · unique visualization per algorithm · 5 examples each</p>
+</div>
+<div class="tabs"><div class="tabs-in" id="tabs"></div></div>
+<div class="layout">
+  <div class="info" id="info"></div>
+  <div class="demo" id="demo"></div>
+</div>
+
+<script>
+const rng=(a,b)=>Array.from({length:b-a},(_,i)=>a+i);
+const BCOLS=['#4f7ef7','#22c55e','#f59e0b','#ec4899','#a855f7','#14b8a6','#f97316','#ef4444','#fb923c','#06b6d4'];
+const D10=['#64748b','#4f7ef7','#22c55e','#f59e0b','#ec4899','#a855f7','#14b8a6','#f97316','#ef4444','#fb923c'];
+
+const ALGOS=[
+  {id:'bubble',name:'Bubble Sort',type:'Comparison · In-Place',best:'O(n)',avg:'O(n²)',worst:'O(n²)',space:'O(1)',stable:true,
+   desc:'Repeatedly compares adjacent elements and swaps them if out of order. After each pass, the largest unsorted element "bubbles up" to its correct position.',
+   steps:['Start at index 0. Compare a[j] with a[j+1].','If a[j] > a[j+1], swap them. Otherwise move right.','After one full pass, the largest element is in its final position.','Reduce the unsorted boundary by 1 and repeat.','Stop early if a pass makes zero swaps — already sorted!'],
+   note:'Bar height = element value. Amber = comparing, Red = swapping, Green = final position.',
+   examples:[[64,34,25,12,22],[5,1,4,2,8],[1,2,3,4,5],[5,4,3,2,1],[3,1,4,1,5,9,2,6]],gen:genBubble},
+  {id:'selection',name:'Selection Sort',type:'Comparison · In-Place',best:'O(n²)',avg:'O(n²)',worst:'O(n²)',space:'O(1)',stable:false,
+   desc:'Scans unsorted region for the minimum, then swaps it to the sorted boundary. Grows sorted region by 1 per pass.',
+   steps:['Full array is unsorted. Sorted region (left of ▶) is empty.','Scan unsorted region to find the minimum element.','Swap the minimum with the first unsorted element.','Sorted boundary ▶ moves right by 1.','Repeat until one element remains.'],
+   note:'Green = sorted region. Orange = current min found. Amber = being scanned. Dashed line = sorted/unsorted boundary.',
+   examples:[[29,10,14,37,13],[64,25,12,22,11],[7,5,3,9,1],[1,3,5,7,9],[4,2,6,1,8,3]],gen:genSelection},
+  {id:'insertion',name:'Insertion Sort',type:'Comparison · In-Place',best:'O(n)',avg:'O(n²)',worst:'O(n²)',space:'O(1)',stable:true,
+   desc:'Like sorting playing cards. Build a sorted hand one card at a time — pick each card from the deck and slide it into the correct position in the hand.',
+   steps:['a[0] is the initial sorted hand (one card).','Pick the next card from the deck as the "key".','Slide key left, shifting larger hand cards one step right.','Insert key at its correct sorted position.','Hand grows by one. Repeat until deck is empty.'],
+   note:'Left (green) = sorted hand. Right (gray) = deck. Purple = key card being inserted. Amber = card shifting right.',
+   examples:[[12,11,13,5,6],[31,25,8,3,21],[1,5,3,8,2],[9,8,7,6,5,4],[2,4,1,5,3]],gen:genInsertion},
+  {id:'shell',name:'Shell Sort',type:'Comparison · In-Place',best:'O(n log n)',avg:'O(n log²n)',worst:'O(n²)',space:'O(1)',stable:false,
+   desc:'Extends insertion sort with decreasing gap sizes. Large gaps move far-out-of-place elements quickly; gap=1 finishes the sort.',
+   steps:['Set gap = n/2. Compare elements "gap" positions apart.','Elements far out of place move large distances in one swap.','Halve the gap and repeat the gapped insertion sort.','Continue until gap = 1 — array is nearly sorted.','Final gap=1 pass is a fast insertion sort on nearly-sorted data.'],
+   note:'Elements in the same gap-group are shown connected by colored brackets. Amber = comparing, Red = swapping.',
+   examples:[[23,29,15,19,31,7,9,5,2],[12,34,54,2,3],[10,7,8,9,1,5],[8,6,4,2,1],[3,7,1,9,5,11,2]],gen:genShell},
+  {id:'merge',name:'Merge Sort',type:'Divide & Conquer',best:'O(n log n)',avg:'O(n log n)',worst:'O(n log n)',space:'O(n)',stable:true,
+   desc:'Split array into halves recursively until single elements. Then merge pairs of sorted segments bottom-up into larger sorted segments until fully sorted.',
+   steps:['Split: Divide array at midpoint → Left half & Right half.','Recursively split each half until all segments have size 1.','Merge: Compare front of each sorted segment, pick smaller.','Place the smaller element. Advance that pointer.','Repeat merging — atoms → pairs → quads → full sorted array.'],
+   note:'Split phase: tree fans out downward. Merge phase: segments grow from atoms → pairs → quads → sorted (reading top to bottom).',
+   examples:[[38,27,43,3,9,82,10],[5,2,4,6,1,3],[8,4,2,1],[14,7,3,12,9,11,6,2],[1,5,3,7,2,6,4,8]],gen:genMerge},
+  {id:'quick',name:'Quick Sort',type:'Divide & Conquer',best:'O(n log n)',avg:'O(n log n)',worst:'O(n²)',space:'O(log n)',stable:false,
+   desc:'Picks a pivot and partitions the array into ≤ pivot (left) and > pivot (right). Pivot lands in its final position. Recursively sort both sides.',
+   steps:['Choose pivot = last element. Set i = low−1.','For j = low to high−1: if a[j] ≤ pivot, i++, swap a[i] ↔ a[j].','Swap pivot into position i+1. Pivot is now FINAL!','Left zone (all ≤ pivot) and right zone (all > pivot) each sorted recursively.','Recursively apply Quick Sort to both zones.'],
+   note:'Blue zone = elements ≤ pivot. Pink = pivot in final position. Orange zone = elements > pivot. Green = fully sorted.',
+   examples:[[10,7,8,9,1,5],[3,6,8,10,1,2,1],[1,2,3,4,5],[5,4,3,2,1],[2,8,7,1,3,5,6,4]],gen:genQuick},
+  {id:'heap',name:'Heap Sort',type:'Comparison · In-Place',best:'O(n log n)',avg:'O(n log n)',worst:'O(n log n)',space:'O(1)',stable:false,
+   desc:'Builds a Max-Heap binary tree. Root = max element. Repeatedly extract root (max) to sorted end. Re-heapify after each extraction.',
+   steps:['Build Max Heap: heapify every non-leaf from index n/2−1 down to 0.','Heapify: if child > parent, swap and recurse down.','Root a[0] = maximum of the current heap.','Swap root with last unsorted element. It is now in final position.','Shrink heap by 1, re-heapify new root. Repeat.'],
+   note:'Tree nodes connected by lines. Purple = in heap. Amber = comparing parent vs child. Red = swapping. Green = sorted.',
+   examples:[[4,10,3,5,1],[12,11,13,5,6,7],[16,4,10,14,7,9,3,2,8,1],[3,1,4,1,5,9,2,6],[7,6,5,4,3,2,1]],gen:genHeap},
+  {id:'counting',name:'Counting Sort',type:'Non-Comparison · Integer',best:'O(n+k)',avg:'O(n+k)',worst:'O(n+k)',space:'O(k)',stable:true,
+   desc:'Counts occurrences of each value (tally chart). Computes prefix sums to find each value\'s sorted position. Places elements directly — no comparisons.',
+   steps:['n = input size, k = max value. Create count[0..k] = all zeros.','Count: for each a[i], increment count[a[i]]. Tally the occurrences.','Prefix sum: count[i] += count[i−1]. Now count[v] = # elements ≤ v.','Build output right-to-left: place a[i] at output[count[a[i]]−1], decrement count[a[i]].','Copy output to original array.'],
+   note:'Shows n, k variables. Tally bars = count of each value. Output row fills in one slot at a time (right to left for stability).',
+   examples:[[4,2,2,8,3,3,1],[1,4,1,2,7,5,2],[0,1,0,1,0,1],[5,5,5,5],[9,1,3,5,7,2,4,6,8]],gen:genCounting},
+  {id:'bucket',name:'Bucket Sort',type:'Non-Comparison · Distribution',best:'O(n+k)',avg:'O(n+k)',worst:'O(n²)',space:'O(n+k)',stable:true,
+   desc:'Distributes elements into numbered buckets by value range. Sort each bucket individually, then concatenate all buckets in order.',
+   steps:['Create √n buckets covering equal sub-ranges of the value range.','Place each element into the bucket matching its value range.','Sort each bucket individually (insertion sort for small buckets).','Concatenate all buckets: B0, B1, B2, … in order.','Elements in bucket i are ALL smaller than elements in bucket i+1.'],
+   note:'Colored buckets fill up during distribution. Each bucket is sorted individually then concatenated.',
+   examples:[[29,25,3,49,9,37,21,43],[11,9,21,8,17,19,13,1,24,12],[42,32,33,52,37,47,51],[78,17,39,26,72,94,21,12],[5,3,8,1,9,6,2,7,4]],gen:genBucket},
+  {id:'radix',name:'Radix Sort',type:'Non-Comparison · Digit',best:'O(d(n+k))',avg:'O(d(n+k))',worst:'O(d(n+k))',space:'O(n+k)',stable:true,
+   desc:'Sorts digit by digit from Least Significant Digit (ones) to Most Significant Digit. Uses stable counting sort at each digit position.',
+   steps:['d = digits in max number, n = input size, k = base (10).','Pass 1: Counting sort by ONES digit. Distribute into buckets 0–9.','Pass 2: Counting sort by TENS digit. Stability preserves prior order.','Continue for each digit position (hundreds, thousands …).','After d passes, array is fully sorted.'],
+   note:'Shows d, n, k variables. 10 buckets (0–9) per pass. Active digit is highlighted inside each number.',
+   examples:[[170,45,75,90,802,24,2,66],[329,457,657,839,436,720,355],[121,432,564,23,1,45,788],[53,89,150,36,633,233],[10,102,1,543,87,20,300]],gen:genRadix}
+];
+
+// ════════ STEP GENERATORS ════════
+
+function genBubble(orig){
+  const S=[],a=[...orig],n=a.length;
+  const mk=(desc,cmp,swp,srt)=>({arr:[...a],desc,v:{t:'bubble',cmp:new Set(cmp),swp:new Set(swp),srt:new Set(srt)}});
+  S.push(mk(`Initial array: [${a.join(', ')}]. Bars show values — taller bar = larger value.`,[],[],[]));
+  for(let i=0;i<n-1;i++){
+    let did=false;
+    const srt=rng(n-i,n);
+    for(let j=0;j<n-1-i;j++){
+      S.push(mk(`Pass ${i+1}: Compare a[${j}]=${a[j]} ↔ a[${j+1}]=${a[j+1]}. Is ${a[j]} > ${a[j+1]}?`,[j,j+1],[],srt));
+      if(a[j]>a[j+1]){
+        [a[j],a[j+1]]=[a[j+1],a[j]];did=true;
+        S.push(mk(`YES → SWAP! Array: [${a.join(', ')}]`,[],[j,j+1],srt));
+      } else {
+        S.push(mk(`No (${a[j]} ≤ ${a[j+1]}). Move right.`,[],[],srt));
+      }
+    }
+    const srt2=rng(n-1-i,n);
+    S.push(mk(`Pass ${i+1} done. ${a[n-1-i]} in final position.${!did?' No swaps → sorted early!':''}`,[],[],srt2));
+    if(!did)break;
+  }
+  S.push({arr:[...a],desc:`✓ Sorted: [${a.join(', ')}]`,v:{t:'bubble',cmp:new Set(),swp:new Set(),srt:new Set(rng(0,n))}});
+  return S;
+}
+
+function genSelection(orig){
+  const S=[],a=[...orig],n=a.length;
+  const mk=(desc,srtBound,scan,minIdx,swp)=>({arr:[...a],desc,v:{t:'selection',srtBound,scan,minIdx,swp:new Set(swp||[])}});
+  S.push(mk(`Initial: [${a.join(', ')}]. Sorted boundary ▶ starts at 0.`,0,null,null));
+  for(let i=0;i<n-1;i++){
+    let mi=i;
+    S.push(mk(`Pass ${i+1}: Start scanning. Assume a[${i}]=${a[i]} is minimum.`,i,i,i));
+    for(let j=i+1;j<n;j++){
+      S.push(mk(`Scan a[${j}]=${a[j]}. Current min = a[${mi}]=${a[mi]}. ${a[j]<a[mi]?'New min!':'No change.'}`,i,j,mi));
+      if(a[j]<a[mi]){mi=j;S.push(mk(`Updated min → a[${mi}]=${a[mi]}`,i,j,mi));}
+    }
+    if(mi!==i){
+      S.push(mk(`Min is a[${mi}]=${a[mi]}. Swap with a[${i}]=${a[i]}.`,i,null,mi,[i,mi]));
+      [a[i],a[mi]]=[a[mi],a[i]];
+      S.push(mk(`Swapped! ${a[i]} placed at sorted position ${i}.`,i+1,null,null));
+    } else {
+      S.push(mk(`a[${i}]=${a[i]} is already minimum. No swap needed.`,i+1,null,null));
+    }
+  }
+  S.push({arr:[...a],desc:`✓ Sorted: [${a.join(', ')}]`,v:{t:'selection',srtBound:n,scan:null,minIdx:null,swp:new Set()}});
+  return S;
+}
+
+function genInsertion(orig){
+  const S=[],a=[...orig],n=a.length;
+  const mk=(desc,sortedTo,keyIdx,shifting)=>({arr:[...a],desc,v:{t:'insertion',sortedTo,keyIdx,shifting:new Set(shifting||[])}});
+  S.push(mk(`a[0]=${a[0]} is the initial sorted hand. Remaining = deck.`,0,null,null));
+  for(let i=1;i<n;i++){
+    const kv=a[i];let j=i-1;
+    S.push(mk(`Pick key=${kv} from deck (a[${i}]). Slide into sorted hand [${a.slice(0,i).join(', ')}].`,i-1,i,null));
+    while(j>=0&&a[j]>kv){
+      S.push(mk(`a[${j}]=${a[j]} > ${kv} → shift right.`,i-1,j,[j]));
+      a[j+1]=a[j];a[j]=kv;j--;
+      S.push(mk(`Shifted. Array: [${a.join(', ')}]`,i-1,j+1,null));
+    }
+    S.push(mk(`key=${kv} inserted at position ${j+1}. Hand: [${a.slice(0,i+1).join(', ')}]`,i,null,null));
+  }
+  S.push({arr:[...a],desc:`✓ Sorted: [${a.join(', ')}]`,v:{t:'insertion',sortedTo:n-1,keyIdx:null,shifting:new Set()}});
+  return S;
+}
+
+function genShell(orig){
+  const S=[],a=[...orig],n=a.length;
+  const mk=(desc,gap,cmp,swp)=>({arr:[...a],desc,v:{t:'shell',gap,cmp:new Set(cmp||[]),swp:new Set(swp||[])}});
+  S.push(mk(`Initial: [${a.join(', ')}]. Starting gap = ${Math.floor(n/2)}.`,Math.floor(n/2)));
+  let gap=Math.floor(n/2);
+  while(gap>0){
+    S.push(mk(`── Gap = ${gap}: compare and swap elements ${gap} positions apart ──`,gap));
+    for(let i=gap;i<n;i++){
+      const tmp=a[i];let j=i;
+      S.push(mk(`Gap=${gap}: a[${i}]=${tmp} ↔ a[${i-gap}]=${a[i-gap]}`,gap,[i-gap,i]));
+      while(j>=gap&&a[j-gap]>tmp){
+        S.push(mk(`${a[j-gap]}>${tmp} → swap!`,gap,[],[j-gap,j]));
+        a[j]=a[j-gap];a[j-gap]=tmp;j-=gap;
+        S.push(mk(`Swapped. Array: [${a.join(', ')}]`,gap));
+      }
+    }
+    S.push(mk(`Gap=${gap} pass done: [${a.join(', ')}]. Next gap → ${Math.floor(gap/2)||'(done)'}`,gap));
+    gap=Math.floor(gap/2);
+  }
+  S.push({arr:[...a],desc:`✓ Sorted: [${a.join(', ')}]`,v:{t:'shell',gap:0,cmp:new Set(),swp:new Set()}});
+  return S;
+}
+
+function genMerge(orig){
+  const S=[],a=[...orig],n=a.length;
+  // Track merge levels bottom-up: level 0 = atoms, level 1 = pairs, etc.
+  // segStates[lo-hi] = 'pending'|'merging'|'done'
+  const segStates={};
+  for(let i=0;i<n;i++) segStates[`${i}-${i}`]='done'; // atoms start done
+
+  const mk=(desc,phase,activeRange,lvlData)=>({arr:[...a],desc,v:{t:'merge',phase,activeRange,lvlData,n}});
+
+  S.push(mk(`Initial: [${a.join(', ')}]. Will split → atoms → merge upward.`,'split',null,buildLvlData(a,n,segStates)));
+
+  function buildLvlData(arr,n,states){
+    // Returns array of levels. Level 0 = individual atoms. Each level groups 2^level elements.
+    const levels=[];
+    let size=1;
+    while(size<=n){
+      const segs=[];
+      for(let lo=0;lo<n;lo+=size){
+        const hi=Math.min(lo+size-1,n-1);
+        const key=`${lo}-${hi}`;
+        segs.push({lo,hi,vals:[...arr].slice(lo,hi+1),state:states[key]||'pending'});
+      }
+      levels.push({size,segs});
+      size*=2;
+    }
+    return levels;
+  }
+
+  function ms(lo,hi){
+    if(lo>=hi) return;
+    const mid=Math.floor((lo+hi)/2);
+    S.push(mk(`Split [${a.slice(lo,hi+1).join(',')}] at mid=${mid} → L:[${a.slice(lo,mid+1).join(',')}] | R:[${a.slice(mid+1,hi+1).join(',')}]`,'split',{lo,hi,mid},buildLvlData(a,n,segStates)));
+    ms(lo,mid);
+    ms(mid+1,hi);
+    // merge
+    const L=a.slice(lo,mid+1),R=a.slice(mid+1,hi+1);
+    segStates[`${lo}-${hi}`]='merging';
+    S.push(mk(`Merge L:[${L.join(',')}] + R:[${R.join(',')}]`,'merge',{lo,hi,mid},buildLvlData(a,n,segStates)));
+    let i=0,j=0,k=lo;
+    while(i<L.length&&j<R.length){
+      S.push(mk(`Compare L[${i}]=${L[i]} vs R[${j}]=${R[j]} → place ${L[i]<=R[j]?L[i]:R[j]}`,'merge',{lo,hi,mid,cmpL:lo+i,cmpR:mid+1+j},buildLvlData(a,n,segStates)));
+      if(L[i]<=R[j]){a[k]=L[i];i++;}else{a[k]=R[j];j++;}k++;
+    }
+    while(i<L.length){a[k]=L[i];i++;k++;}
+    while(j<R.length){a[k]=R[j];j++;k++;}
+    segStates[`${lo}-${hi}`]='done';
+    S.push(mk(`Merged → [${a.slice(lo,hi+1).join(', ')}]`,'merged',{lo,hi},buildLvlData(a,n,segStates)));
+  }
+
+  ms(0,n-1);
+  S.push({arr:[...a],desc:`✓ Sorted: [${a.join(', ')}]`,v:{t:'merge',phase:'done',activeRange:null,lvlData:buildLvlData(a,n,segStates),n}});
+  return S;
+}
+
+function genQuick(orig){
+  const S=[],a=[...orig],n=a.length;
+  const srtSet=new Set();
+  const mk=(desc,pvtIdx,lo,hi,cmpJ)=>({arr:[...a],desc,v:{t:'quick',pvtIdx,lo,hi,cmpJ,srt:new Set(srtSet)}});
+  S.push(mk(`Initial: [${a.join(', ')}]. Pivot = last element each partition.`,null,0,n-1,null));
+  function partition(lo,hi){
+    const pv=a[hi];let i=lo-1;
+    S.push(mk(`Partition [${a.slice(lo,hi+1).join(',')}]. Pivot=${pv} at a[${hi}].`,hi,lo,hi,null));
+    for(let j=lo;j<hi;j++){
+      S.push(mk(`a[${j}]=${a[j]} ${a[j]<=pv?'≤':'>'} pivot ${pv} → ${a[j]<=pv?'move to left zone':'stays in right zone'}`,hi,lo,hi,j));
+      if(a[j]<=pv){
+        i++;
+        if(i!==j){[a[i],a[j]]=[a[j],a[i]];S.push(mk(`Swap a[${i}]↔a[${j}]. Array:[${a.join(',')}]`,hi,lo,hi,null));}
+        else S.push(mk(`i=j=${i}, no swap needed.`,hi,lo,hi,null));
+      }
+    }
+    [a[i+1],a[hi]]=[a[hi],a[i+1]];
+    const pi=i+1;srtSet.add(pi);
+    S.push(mk(`Pivot ${a[pi]} → final position ${pi}!`,pi,lo,hi,null));
+    return pi;
+  }
+  function qs(lo,hi){
+    if(lo>hi)return;
+    if(lo===hi){srtSet.add(lo);S.push(mk(`Single element ${a[lo]} — already sorted.`,null,lo,hi,null));return;}
+    const pi=partition(lo,hi);qs(lo,pi-1);qs(pi+1,hi);
+  }
+  qs(0,n-1);
+  S.push({arr:[...a],desc:`✓ Sorted: [${a.join(', ')}]`,v:{t:'quick',pvtIdx:null,lo:0,hi:n-1,cmpJ:null,srt:new Set(rng(0,n))}});
+  return S;
+}
+
+function genHeap(orig){
+  const S=[],a=[...orig],n=a.length;
+  const mk=(desc,hs,cmpN,swpN,srtFrom)=>({arr:[...a],desc,v:{t:'heap',hs,cmpN:new Set(cmpN||[]),swpN:new Set(swpN||[]),srtFrom:srtFrom??n}});
+  S.push(mk(`Initial: [${a.join(', ')}]. Building Max Heap (parent ≥ children).`,n));
+  function heapify(sz,i){
+    let mx=i,l=2*i+1,r=2*i+2;
+    S.push(mk(`Heapify(${i}=${a[i]}): left=${l<sz?a[l]:'—'}, right=${r<sz?a[r]:'—'}`,sz,[i,l<sz?l:-1,r<sz?r:-1].filter(x=>x>=0),[],sz));
+    if(l<sz&&a[l]>a[mx])mx=l;
+    if(r<sz&&a[r]>a[mx])mx=r;
+    if(mx!==i){
+      S.push(mk(`a[${mx}]=${a[mx]} > a[${i}]=${a[i]} → SWAP`,sz,[],[i,mx],sz));
+      [a[i],a[mx]]=[a[mx],a[i]];
+      S.push(mk(`Swapped. Recurse down at ${mx}. Array:[${a.join(',')}]`,sz,[],[],sz));
+      heapify(sz,mx);
+    } else {
+      S.push(mk(`a[${i}]=${a[i]} ≥ children. OK.`,sz,[],[],sz));
+    }
+  }
+  for(let i=Math.floor(n/2)-1;i>=0;i--)heapify(n,i);
+  S.push(mk(`Max Heap built! Root a[0]=${a[0]} is maximum.`,n,[0]));
+  for(let i=n-1;i>0;i--){
+    S.push(mk(`Extract max ${a[0]}: swap root ↔ a[${i}]=${a[i]}.`,i,[],[0,i],i));
+    [a[0],a[i]]=[a[i],a[0]];
+    S.push(mk(`${a[i]} placed at final pos ${i}. Heap size = ${i}. Re-heapify root.`,i,[],[],i));
+    heapify(i,0);
+  }
+  S.push({arr:[...a],desc:`✓ Sorted: [${a.join(', ')}]`,v:{t:'heap',hs:0,cmpN:new Set(),swpN:new Set(),srtFrom:0}});
+  return S;
+}
+
+function genCounting(orig){
+  const S=[],a=[...orig],n=a.length,mx=Math.max(...a);
+  let cnt=new Array(mx+1).fill(0),out=new Array(n).fill(null);
+  const mk=(desc,phase,actSrc,actCnt,actOut)=>({arr:[...a],desc,v:{t:'counting',phase,actSrc,actCnt,actOut,cnt:[...cnt],out:[...out],n,k:mx}});
+  S.push(mk(`n = ${n} (input size), k = ${mx} (max value). Create count[0..${mx}] = all zeros.`,'init',null,null,null));
+  for(let i=0;i<n;i++){
+    cnt[a[i]]++;
+    S.push(mk(`Count a[${i}]=${a[i]}: count[${a[i]}] → ${cnt[a[i]]}`,'count',i,a[i],null));
+  }
+  S.push(mk(`Counting done! count = [${cnt.join(', ')}]`,'count',null,null,null));
+  for(let i=1;i<=mx;i++){
+    cnt[i]+=cnt[i-1];
+    S.push(mk(`Prefix sum: count[${i}] += count[${i-1}] → ${cnt[i]}`,'prefix',null,i,null));
+  }
+  S.push(mk(`Prefix sums: [${cnt.join(', ')}]. count[v] = # elements ≤ v = final position.`,'prefix',null,null,null));
+  for(let i=n-1;i>=0;i--){
+    const v=a[i],pos=cnt[v]-1;
+    out[pos]=v;cnt[v]--;
+    S.push(mk(`Place a[${i}]=${v} at output[${pos}]. count[${v}]-- → ${cnt[v]}`,'output',i,v,pos));
+  }
+  for(let i=0;i<n;i++)a[i]=out[i];
+  S.push(mk(`✓ Sorted: [${a.join(', ')}]`,'done',null,null,null));
+  return S;
+}
+
+function genBucket(orig){
+  const S=[],a=[...orig],n=a.length;
+  const mn=Math.min(...a),mx=Math.max(...a),rv=mx-mn+1;
+  const nb=Math.max(2,Math.min(8,Math.ceil(Math.sqrt(n))));
+  let bkts=Array.from({length:nb},()=>[]);
+  const snap=()=>bkts.map(b=>[...b]);
+  const mk=(desc,phase,activeEl,activeBkt)=>({arr:[...a],desc,v:{t:'bucket',phase,activeEl,activeBkt,bkts:snap(),nb,mn,mx}});
+  S.push(mk(`Initial: [${a.join(', ')}]. Range ${mn}–${mx}. Creating ${nb} buckets.`,'init',null,null));
+  for(let i=0;i<n;i++){
+    const bi=Math.min(Math.floor((a[i]-mn)/rv*nb),nb-1);
+    S.push(mk(`a[${i}]=${a[i]} → Bucket B${bi}`,'distribute',i,bi));
+    bkts[bi].push(a[i]);
+    S.push(mk(`B${bi}: [${bkts[bi].join(', ')}]`,'distribute',null,bi));
+  }
+  S.push(mk(`Distribution done. Now sort each bucket.`,'sort',null,null));
+  for(let i=0;i<nb;i++){
+    if(bkts[i].length>1){
+      S.push(mk(`Sorting B${i}: [${bkts[i].join(', ')}]`,'sort',null,i));
+      bkts[i].sort((x,y)=>x-y);
+      S.push(mk(`B${i} sorted → [${bkts[i].join(', ')}]`,'sort',null,i));
+    }
+  }
+  S.push(mk(`All sorted. Concatenating B0 → B${nb-1}…`,'concat',null,null));
+  let idx=0;
+  for(let i=0;i<nb;i++){
+    for(const val of bkts[i]){
+      a[idx]=val;
+      S.push(mk(`Concat B${i}: place ${val} → a[${idx}]. Array:[${a.join(',')}]`,'concat',idx,i));
+      idx++;
+    }
+  }
+  S.push({arr:[...a],desc:`✓ Sorted: [${a.join(', ')}]`,v:{t:'bucket',phase:'done',activeEl:null,activeBkt:null,bkts:snap(),nb,mn,mx}});
+  return S;
+}
+
+function genRadix(orig){
+  const S=[],a=[...orig],n=a.length;
+  const mx=Math.max(...a),d=mx.toString().length;
+  const DNAMES=['ones','tens','hundreds','thousands'];
+  let exp=1,pass=1;
+  const mk=(desc,currExp,dbkts,activeEl)=>({arr:[...a],desc,v:{t:'radix',currExp,dbkts:dbkts?dbkts.map(b=>[...b]):null,activeEl,pass,n,d,k:10}});
+  S.push(mk(`n = ${n},  d = ${d} (digits in max=${mx}),  k = 10 (base). Complexity: O(d(n+k)) = O(${d}×${n+10}) = O(${d*(n+10)}).`,null,null,null));
+  while(Math.floor(mx/exp)>0){
+    const dn=DNAMES[pass-1]||`10^${pass-1}`;
+    S.push(mk(`═══ Pass ${pass}/${d}: Sort by ${dn} digit ═══`,exp,null,null));
+    const dbkts=Array.from({length:10},()=>[]);
+    for(let i=0;i<n;i++){
+      const dig=Math.floor(a[i]/exp)%10;
+      S.push(mk(`a[${i}]=${a[i]}: ${dn} digit = ${dig} → Bucket[${dig}]`,exp,dbkts.map(b=>[...b]),i));
+      dbkts[dig].push(a[i]);
+      S.push(mk(`Bucket[${dig}] = [${dbkts[dig].join(', ')}]`,exp,dbkts.map(b=>[...b]),null));
+    }
+    S.push(mk(`Read back: ${dbkts.map((b,i)=>b.length?`B${i}:[${b.join(',')}]`:'').filter(Boolean).join(' ')}`,exp,dbkts.map(b=>[...b]),null));
+    let k=0;for(let dig=0;dig<10;dig++)for(const v of dbkts[dig]){a[k]=v;k++;}
+    S.push(mk(`After Pass ${pass} (by ${dn}): [${a.join(', ')}]`,exp,null,null));
+    exp*=10;pass++;
+  }
+  S.push({arr:[...a],desc:`✓ Sorted: [${a.join(', ')}]`,v:{t:'radix',currExp:null,dbkts:null,activeEl:null,pass,n,d,k:10}});
+  return S;
+}
+
+// ════════ RENDERERS ════════
+
+function renderViz(step){
+  const v=step.v;
+  if(!v)return``;
+  switch(v.t){
+    case 'bubble':    return renderBubble(step);
+    case 'selection': return renderSelection(step);
+    case 'insertion': return renderInsertion(step);
+    case 'shell':     return renderShell(step);
+    case 'merge':     return renderMerge(step);
+    case 'quick':     return renderQuick(step);
+    case 'heap':      return renderHeap(step);
+    case 'counting':  return renderCounting(step);
+    case 'bucket':    return renderBucket(step);
+    case 'radix':     return renderRadix(step);
+    default: return '';
+  }
+}
+
+/* ─── BUBBLE: tall bars + element row ─── */
+function renderBubble(step){
+  const {arr,v}=step,max=Math.max(...arr,1);
+  let bars=`<div class="bars-wrap" style="margin-bottom:8px">`;
+  arr.forEach((val,i)=>{
+    const pct=Math.max(5,Math.round(val/max*100));
+    let bc='var(--blue)';
+    if(v.srt.has(i))bc='var(--green)';
+    else if(v.swp.has(i))bc='var(--red)';
+    else if(v.cmp.has(i))bc='var(--amber)';
+    bars+=`<div class="bar-col">
+      <div class="bar-val">${val}</div>
+      <div class="bar-body" style="height:${pct}%;background:${bc}"></div>
+    </div>`;
+  });
+  bars+=`</div>`;
+  let row=`<div class="arr-row">`;
+  arr.forEach((val,i)=>{
+    let cls='';
+    if(v.srt.has(i))cls='srt';else if(v.swp.has(i))cls='swp';else if(v.cmp.has(i))cls='cmp';
+    row+=`<span class="el" style="min-width:26px;height:26px;font-size:.75rem;${cls==='srt'?'border-color:var(--green);color:var(--green);background:rgba(34,197,94,.1)':cls==='swp'?'border-color:var(--red);color:var(--red);background:rgba(239,68,68,.12)':cls==='cmp'?'border-color:var(--amber);color:var(--amber);background:rgba(245,158,11,.12)':''}">${val}</span>`;
+  });
+  row+=`</div>`;
+  return bars+row+`<div class="lgd"><div class="li"><div class="ld" style="background:var(--blue)"></div>unsorted</div><div class="li"><div class="ld" style="background:var(--amber)"></div>comparing</div><div class="li"><div class="ld" style="background:var(--red)"></div>swapping</div><div class="li"><div class="ld" style="background:var(--green)"></div>sorted</div></div>`;
+}
+
+/* ─── SELECTION: big elements + precise pointer row ─── */
+function renderSelection(step){
+  const {arr,v}=step,n=arr.length;
+  let elHtml=`<div style="display:flex;gap:4px;flex-wrap:nowrap;overflow-x:auto;padding-bottom:2px">`;
+  arr.forEach((val,i)=>{
+    let cls='';
+    if(i<v.srtBound)cls='srt';
+    else if(v.swp&&v.swp.has(i))cls='swp';
+    else if(i===v.minIdx)cls='min';
+    else if(i===v.scan&&i!==v.minIdx)cls='cmp';
+    elHtml+=`<div class="sel-el ${cls}" style="position:relative">${val}${i===v.srtBound&&v.srtBound<n?`<div style="position:absolute;bottom:-16px;left:50%;transform:translateX(-50%);font-size:.6rem;color:var(--acc2);font-weight:700;white-space:nowrap">▶</div>`:''}
+    </div>`;
+  });
+  elHtml+=`</div>`;
+  // Pointer labels
+  let ptrHtml=`<div style="display:flex;gap:4px;margin-top:20px;flex-wrap:nowrap;overflow-x:hidden">`;
+  arr.forEach((val,i)=>{
+    let lbl='',clr='transparent';
+    if(i===v.minIdx){lbl='MIN';clr='var(--orange)';}
+    else if(i===v.scan&&i!==v.minIdx){lbl='scan';clr='var(--amber)';}
+    else if(i===v.srtBound&&v.srtBound<n){lbl='▶';clr='var(--acc2)';}
+    ptrHtml+=`<div style="width:38px;flex-shrink:0;text-align:center;font-size:.58rem;font-weight:700;color:${clr}">${lbl}</div>`;
+  });
+  ptrHtml+=`</div>`;
+  return `<div style="overflow-x:auto">${elHtml}${ptrHtml}</div>
+  <div class="lgd" style="margin-top:8px"><div class="li"><div class="ld" style="background:var(--green)"></div>sorted</div><div class="li"><div class="ld" style="background:var(--orange)"></div>MIN found</div><div class="li"><div class="ld" style="background:var(--amber)"></div>scanning</div><div class="li"><div class="ld" style="background:var(--red)"></div>swapping</div><div class="li"><div class="ld" style="background:var(--acc2)"></div>▶ boundary</div></div>`;
+}
+
+/* ─── INSERTION: hand & deck ─── */
+function renderInsertion(step){
+  const {arr,v}=step,n=arr.length,sE=v.sortedTo;
+  let handHtml=`<div class="ins-section"><div class="ins-title">✋ Sorted Hand</div><div style="display:flex;flex-wrap:wrap;gap:2px">`;
+  for(let i=0;i<=sE&&i<n;i++){
+    let cls='sorted';
+    if(v.shifting.has(i))cls='shift';
+    if(i===v.keyIdx)cls='keyed';
+    handHtml+=`<div class="card ${cls}">${arr[i]}</div>`;
+  }
+  handHtml+=`</div></div>`;
+  let deckHtml=`<div class="ins-section"><div class="ins-title">🃏 Deck</div><div style="display:flex;flex-wrap:wrap;gap:2px">`;
+  for(let i=sE+1;i<n;i++){
+    let cls='deck';
+    if(i===v.keyIdx)cls='keyed';
+    deckHtml+=`<div class="card ${cls}">${arr[i]}</div>`;
+  }
+  deckHtml+=`</div></div>`;
+  return `<div class="ins-wrap">${handHtml}${deckHtml}</div>
+  <div class="lgd"><div class="li"><div class="ld" style="background:var(--green)"></div>hand (sorted)</div><div class="li"><div class="ld" style="background:var(--acc)"></div>key card</div><div class="li"><div class="ld" style="background:var(--amber)"></div>shifting right</div><div class="li"><div class="ld" style="background:var(--bdr)"></div>deck</div></div>`;
+}
+
+/* ─── SHELL: gap groups ─── */
+function renderShell(step){
+  const {arr,v}=step,n=arr.length,gap=v.gap||1;
+  const GC=['#4f7ef7','#22c55e','#f59e0b','#ec4899','#a855f7','#14b8a6','#f97316','#ef4444'];
+  // Top: element row
+  let elRow=`<div style="display:flex;gap:3px;flex-wrap:wrap;margin-bottom:8px">`;
+  arr.forEach((val,i)=>{
+    let style='';
+    if(v.swp.has(i))style='border-color:var(--red);color:var(--red);background:rgba(239,68,68,.12)';
+    else if(v.cmp.has(i))style='border-color:var(--amber);color:var(--amber);background:rgba(245,158,11,.12)';
+    elRow+=`<div style="display:flex;flex-direction:column;align-items:center;flex:1;min-width:24px">
+      <span class="el" style="width:100%;min-width:24px;height:28px;font-size:.74rem;${style}">${val}</span>
+      <span style="font-size:.52rem;color:var(--dim)">${i}</span>
+    </div>`;
+  });
+  elRow+=`</div>`;
+  // Gap groups
+  let groupsHtml=`<div style="font-size:.6rem;color:var(--dim);margin-bottom:4px">Gap = ${gap} groups:</div><div style="display:flex;gap:4px;flex-wrap:wrap">`;
+  if(gap>0&&gap<n){
+    for(let g=0;g<Math.min(gap,8);g++){
+      const members=[];for(let i=g;i<n;i+=gap)members.push(i);
+      if(members.length<1)continue;
+      const col=GC[g%GC.length];
+      groupsHtml+=`<div style="display:flex;align-items:center;gap:2px;border:1px solid ${col}35;padding:3px 6px;border-radius:6px;background:${col}09">`;
+      members.forEach((idx,mi)=>{
+        let style=`border-color:${v.swp.has(idx)?'var(--red)':v.cmp.has(idx)?'var(--amber)':col};color:${v.swp.has(idx)?'var(--red)':v.cmp.has(idx)?'var(--amber)':col};background:${v.swp.has(idx)?'rgba(239,68,68,.12)':v.cmp.has(idx)?'rgba(245,158,11,.12)':col+'15'}`;
+        groupsHtml+=`<span class="el" style="min-width:24px;height:24px;font-size:.72rem;${style}">${arr[idx]}</span>`;
+        if(mi<members.length-1)groupsHtml+=`<span style="color:${col};font-size:.58rem;opacity:.7">─</span>`;
+      });
+      groupsHtml+=`</div>`;
+    }
+  }
+  groupsHtml+=`</div>`;
+  return elRow+groupsHtml+`<div class="lgd"><div class="li"><div class="ld" style="background:var(--amber)"></div>comparing</div><div class="li"><div class="ld" style="background:var(--red)"></div>swapping</div></div>`;
+}
+
+/* ─── MERGE: top split tree → bottom merge levels ─── */
+function renderMerge(step){
+  const {arr,v}=step;
+  if(!v.lvlData)return'';
+  const {phase,activeRange,lvlData,n}=v;
+
+  // lvlData[0] = atoms, lvlData[1] = pairs, etc.
+  // Show levels from atoms (bottom of split / top of merge) going downward
+  let html=`<div class="merge-levels">`;
+
+  // Phase label
+  const phaseLabel=phase==='split'?'↕ Splitting':'⬇ Merging (atoms → pairs → quads → sorted)';
+  html+=`<div style="font-size:.62rem;font-weight:700;color:${phase==='split'?'var(--blue)':'var(--amber)'};margin-bottom:3px">${phaseLabel}</div>`;
+
+  // Show all levels
+  lvlData.forEach((lvl,li)=>{
+    const segSize=lvl.size;
+    const levelLabel=segSize===1?'atoms':segSize>=n?'sorted':`groups of ${segSize}`;
+    html+=`<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">`;
+    html+=`<div style="font-size:.55rem;color:var(--dim);width:56px;flex-shrink:0;text-align:right">${levelLabel}:</div>`;
+    html+=`<div style="display:flex;gap:3px;flex-wrap:wrap;align-items:center">`;
+    lvl.segs.forEach((seg,si)=>{
+      const isActive=activeRange&&(
+        (phase==='split'&&activeRange.lo===seg.lo&&activeRange.hi===seg.hi)||
+        (phase==='merge'&&activeRange.lo===seg.lo&&activeRange.hi===seg.hi)||
+        (phase==='merged'&&activeRange.lo===seg.lo&&activeRange.hi===seg.hi)
+      );
+      let cls='';
+      if(seg.state==='done')cls='merged';
+      else if(seg.state==='merging')cls='merging';
+      else if(phase==='split'&&activeRange&&activeRange.lo<=seg.lo&&activeRange.hi>=seg.hi)cls='split-active';
+      html+=`<div class="merge-seg-box ${cls}">`;
+      seg.vals.forEach(val=>{
+        let ec=cls==='merged'?'color:var(--green)':cls==='merging'?'color:var(--amber)':cls==='split-active'?'color:var(--blue)':'color:var(--dim)';
+        html+=`<span class="el" style="min-width:20px;height:22px;font-size:.68rem;border-color:transparent;background:transparent;${ec}">${val}</span>`;
+      });
+      html+=`</div>`;
+    });
+    html+=`</div></div>`;
+    // Arrow between levels
+    if(li<lvlData.length-1){
+      html+=`<div style="font-size:.6rem;color:var(--dim);text-align:center;padding-left:64px">↓</div>`;
+    }
+  });
+  html+=`</div>`;
+  html+=`<div class="lgd"><div class="li"><div class="ld" style="background:var(--blue)"></div>splitting</div><div class="li"><div class="ld" style="background:var(--amber)"></div>merging now</div><div class="li"><div class="ld" style="background:var(--green)"></div>merged/sorted</div></div>`;
+  return html;
+}
+
+/* ─── QUICK: three-zone view ─── */
+function renderQuick(step){
+  const {arr,v}=step,n=arr.length;
+  const {pvtIdx,lo,hi,cmpJ,srt}=v;
+  // Full array row
+  let row=`<div style="display:flex;gap:3px;flex-wrap:wrap;margin-bottom:6px">`;
+  arr.forEach((val,i)=>{
+    let style='';
+    if(srt.has(i))style='border-color:var(--green);color:var(--green);background:rgba(34,197,94,.1)';
+    else if(i===pvtIdx)style='border-color:var(--pink);color:var(--pink);background:rgba(236,72,153,.12)';
+    else if(i===cmpJ)style='border-color:var(--amber);color:var(--amber);background:rgba(245,158,11,.12)';
+    else if(i<lo||i>hi)style='border-color:var(--green);color:var(--green);background:rgba(34,197,94,.1)';
+    row+=`<span class="el" style="min-width:28px;height:28px;font-size:.78rem;${style}">${val}</span>`;
+  });
+  row+=`</div>`;
+  // Three zones
+  let zonesHtml=`<div style="display:flex;flex-direction:column;gap:4px;margin-top:4px">`;
+  zonesHtml+=`<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">`;
+  zonesHtml+=`<span style="font-size:.6rem;color:var(--blue);width:68px;flex-shrink:0;text-align:right">≤ pivot</span>`;
+  zonesHtml+=`<div class="qk-zone left-z">`;
+  if(pvtIdx!==null){
+    arr.forEach((val,i)=>{if(i>=lo&&i<pvtIdx&&!srt.has(i))zonesHtml+=`<span class="el" style="min-width:24px;height:24px;font-size:.72rem;border-color:var(--blue);color:var(--blue)">${val}</span>`;});
+  }
+  zonesHtml+=`</div></div>`;
+  if(pvtIdx!==null&&arr[pvtIdx]!==undefined){
+    zonesHtml+=`<div style="display:flex;align-items:center;gap:5px">`;
+    zonesHtml+=`<span style="font-size:.6rem;color:var(--pink);width:68px;flex-shrink:0;text-align:right">pivot</span>`;
+    zonesHtml+=`<div class="qk-zone pvt-z"><span class="el" style="min-width:24px;height:24px;font-size:.72rem;border-color:var(--pink);color:var(--pink)">${arr[pvtIdx]}</span></div>`;
+    zonesHtml+=`</div>`;
+  }
+  zonesHtml+=`<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">`;
+  zonesHtml+=`<span style="font-size:.6rem;color:var(--orange);width:68px;flex-shrink:0;text-align:right">> pivot</span>`;
+  zonesHtml+=`<div class="qk-zone right-z">`;
+  if(pvtIdx!==null){
+    arr.forEach((val,i)=>{if(i>pvtIdx&&i<=hi&&!srt.has(i))zonesHtml+=`<span class="el" style="min-width:24px;height:24px;font-size:.72rem;border-color:var(--orange);color:var(--orange)">${val}</span>`;});
+  }
+  zonesHtml+=`</div></div></div>`;
+  return row+zonesHtml+`<div class="lgd"><div class="li"><div class="ld" style="background:var(--blue)"></div>≤ pivot</div><div class="li"><div class="ld" style="background:var(--pink)"></div>pivot</div><div class="li"><div class="ld" style="background:var(--orange)"></div>> pivot</div><div class="li"><div class="ld" style="background:var(--green)"></div>sorted</div><div class="li"><div class="ld" style="background:var(--amber)"></div>comparing</div></div>`;
+}
+
+/* ─── HEAP: SVG tree with edges ─── */
+function renderHeap(step){
+  const {arr,v}=step,n=arr.length,hs=v.hs;
+  const maxLvl=hs>0?Math.floor(Math.log2(hs)):0;
+  const bottomCount=Math.pow(2,maxLvl);
+  const nodeR=16,lvlH=54,hPad=20;
+  const svgW=Math.max(320,bottomCount*2*(nodeR*2+8)+hPad*2);
+  const svgH=(maxLvl+1)*lvlH+nodeR+30;
+
+  function pos(idx){
+    const lvl=Math.floor(Math.log2(idx+1));
+    const posInLvl=idx-(Math.pow(2,lvl)-1);
+    const totalInLvl=Math.pow(2,lvl);
+    const cellW=svgW/totalInLvl;
+    return{x:cellW*(posInLvl+0.5),y:20+lvl*lvlH};
+  }
+
+  let edges='',nodes='';
+  // Draw edges first
+  for(let i=1;i<hs;i++){
+    const p=Math.floor((i-1)/2);
+    const pp=pos(p),cp=pos(i);
+    const isSortedEdge=i>=v.srtFrom||p>=v.srtFrom;
+    edges+=`<line x1="${pp.x}" y1="${pp.y}" x2="${cp.x}" y2="${cp.y}" stroke="${isSortedEdge?'rgba(34,197,94,.25)':'rgba(80,96,128,.5)'}" stroke-width="1.5"/>`;
+  }
+  // Draw nodes
+  for(let i=0;i<n;i++){
+    const {x,y}=pos(i<hs?i:i); // position even for sorted
+    if(i>=hs){
+      // sorted nodes below tree
+    } else {
+      let fill='rgba(26,34,53,1)',stroke='#243050',textCol='#c9d5e8';
+      if(v.swpN.has(i)){fill='rgba(239,68,68,.15)';stroke='#ef4444';textCol='#ef4444';}
+      else if(v.cmpN.has(i)){fill='rgba(245,158,11,.15)';stroke='#f59e0b';textCol='#f59e0b';}
+      else if(i<hs){fill='rgba(168,85,247,.1)';stroke='#a855f7';textCol='#a855f7';}
+      nodes+=`<circle cx="${x}" cy="${y}" r="${nodeR}" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/>`;
+      nodes+=`<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-family="monospace" font-size="12" font-weight="700" fill="${textCol}">${arr[i]}</text>`;
+      nodes+=`<text x="${x}" y="${y+nodeR+8}" text-anchor="middle" font-family="monospace" font-size="9" fill="#506080">${i}</text>`;
+    }
+  }
+
+  let svgHtml=`<div class="heap-svg-wrap"><svg width="100%" viewBox="0 0 ${svgW} ${svgH}" style="max-width:100%;min-width:200px">${edges}${nodes}</svg></div>`;
+
+  // Sorted region below
+  const srtPart=arr.slice(hs);
+  if(srtPart.length>0){
+    svgHtml+=`<div style="margin-top:5px;padding-top:5px;border-top:1px solid var(--bdr)"><div style="font-size:.6rem;color:var(--green);margin-bottom:3px">✓ Sorted (extracted):</div><div style="display:flex;gap:3px;flex-wrap:wrap">`;
+    srtPart.forEach(val=>{svgHtml+=`<span class="el" style="min-width:24px;height:24px;font-size:.72rem;border-color:var(--green);color:var(--green);background:rgba(34,197,94,.1)">${val}</span>`;});
+    svgHtml+=`</div></div>`;
+  }
+  return svgHtml+`<div class="lgd"><div class="li"><div class="ld" style="background:var(--purple)"></div>in heap</div><div class="li"><div class="ld" style="background:var(--amber)"></div>comparing</div><div class="li"><div class="ld" style="background:var(--red)"></div>swapping</div><div class="li"><div class="ld" style="background:var(--green)"></div>sorted</div></div>`;
+}
+
+/* ─── COUNTING: simplified tally + n,k vars ─── */
+function renderCounting(step){
+  const {arr,v}=step;
+  const {phase,actSrc,actCnt,actOut,cnt,out,n,k}=v;
+  const maxCnt=Math.max(...cnt,1);
+
+  let html=``;
+  // n, k variables
+  html+=`<div class="cnt-vars">
+    <span class="cnt-var"><span class="vname">n</span><span class="veq"> = </span><span class="vval">${n}</span><span style="color:var(--dim);font-size:.65rem"> (array size)</span></span>
+    <span class="cnt-var"><span class="vname">k</span><span class="veq"> = </span><span class="vval">${k}</span><span style="color:var(--dim);font-size:.65rem"> (max value)</span></span>
+    <span class="cnt-var" style="color:var(--dim);font-size:.68rem">O(n + k) = O(${n+k})</span>
+  </div>`;
+
+  // Input array
+  html+=`<div style="margin-bottom:6px"><div style="font-size:.6rem;color:var(--dim);margin-bottom:3px">Input array (n=${n}):</div><div style="display:flex;gap:3px;flex-wrap:wrap">`;
+  arr.forEach((val,i)=>{
+    let style=(i===actSrc)?'border-color:var(--amber);color:var(--amber);background:rgba(245,158,11,.12)':'';
+    html+=`<span class="el" style="min-width:28px;height:28px;font-size:.78rem;${style}">${val}</span>`;
+  });
+  html+=`</div></div>`;
+
+  // Count/tally bar chart
+  const barMaxH=60;
+  html+=`<div style="margin-bottom:6px"><div style="font-size:.6rem;color:var(--dim);margin-bottom:3px">count[0..k=${k}] — tally of each value:</div>`;
+  html+=`<div class="tally-wrap">`;
+  cnt.forEach((c,i)=>{
+    const h=c>0?Math.max(5,Math.round(c/maxCnt*barMaxH)):5;
+    const isAct=(i===actCnt);
+    const col=isAct?'var(--amber)':phase==='prefix'?'var(--purple)':phase==='output'?'var(--teal)':phase==='done'?'var(--green)':'var(--blue)';
+    html+=`<div class="tally-col">
+      <div class="tally-num" style="color:${c===0?'var(--dim)':col}">${c}</div>
+      <div class="tally-bar-body" style="height:${h}px;background:${col};opacity:${c===0?0.25:1}"></div>
+      <div class="tally-idx" style="color:${isAct?'var(--amber)':'var(--dim)'};font-weight:${isAct?700:400}">${i}</div>
+    </div>`;
+  });
+  html+=`</div></div>`;
+
+  // Output array
+  html+=`<div><div style="font-size:.6rem;color:var(--dim);margin-bottom:3px">Output array (building sorted result):</div>`;
+  html+=`<div class="out-grid">`;
+  out.forEach((val,i)=>{
+    if(val===null){
+      html+=`<div class="out-empty">_</div>`;
+    } else {
+      const style=i===actOut?'border-color:var(--teal);color:var(--teal);background:rgba(20,184,166,.12)':'border-color:var(--green);color:var(--green);background:rgba(34,197,94,.1)';
+      html+=`<span class="el" style="min-width:28px;height:28px;font-size:.78rem;${style}">${val}</span>`;
+    }
+  });
+  html+=`</div></div>`;
+  const phaseLbls={init:'Initializing',count:'Counting occurrences',prefix:'Computing prefix sums',output:'Placing into output',done:'Sorted!'};
+  html+=`<div style="margin-top:5px;font-size:.62rem;color:var(--acc2);font-weight:700">Phase: ${phaseLbls[phase]||phase}</div>`;
+  return html;
+}
+
+/* ─── BUCKET ─── */
+function renderBucket(step){
+  const {v}=step;
+  const {bkts,nb,mn,mx,phase,activeEl,activeBkt}=v;
+  const rv=mx-mn+1;
+  let html=``;
+  // Input
+  html+=`<div style="margin-bottom:6px"><div style="font-size:.6rem;color:var(--dim);margin-bottom:3px">Input:</div><div style="display:flex;gap:3px;flex-wrap:wrap">`;
+  step.arr.forEach((val,i)=>{
+    const bi=Math.min(Math.floor((val-mn)/rv*nb),nb-1);
+    const col=BCOLS[bi%BCOLS.length];
+    const isAct=(i===activeEl);
+    html+=`<span class="el" style="min-width:24px;height:24px;font-size:.72rem;border-color:${isAct?'var(--amber)':col};color:${isAct?'var(--amber)':col}">${val}</span>`;
+  });
+  html+=`</div></div>`;
+  // Buckets
+  html+=`<div style="font-size:.6rem;color:var(--dim);margin-bottom:4px">Buckets (${nb} buckets for range ${mn}–${mx}):</div>`;
+  html+=`<div style="display:flex;gap:5px;flex-wrap:wrap;align-items:flex-start">`;
+  bkts.forEach((items,bi)=>{
+    const col=BCOLS[bi%BCOLS.length];
+    const isAct=(bi===activeBkt);
+    const rangeS=Math.round(mn+bi/nb*rv),rangeE=Math.round(mn+(bi+1)/nb*rv-1);
+    html+=`<div style="display:flex;flex-direction:column;align-items:center;gap:2px">`;
+    html+=`<div style="font-size:.58rem;font-weight:700;padding:.15rem .4rem;border-radius:4px;background:${col}18;color:${col};border:1px solid ${col}40">B${bi}</div>`;
+    html+=`<div class="bucket-container" style="border-color:${isAct?col:col+'50'};min-height:44px;min-width:44px">`;
+    if(items.length===0)html+=`<span style="font-size:.55rem;color:var(--dim)">∅</span>`;
+    else items.forEach(vv=>{html+=`<div class="bucket-item" style="background:${col}15;border:1px solid ${col}40;color:${col}">${vv}</div>`;});
+    html+=`</div>`;
+    html+=`<div style="font-size:.5rem;color:var(--dim);text-align:center">${rangeS}–${rangeE}</div>`;
+    html+=`</div>`;
+  });
+  html+=`</div>`;
+  if(phase==='concat'||phase==='done'){
+    html+=`<div style="margin-top:6px;padding-top:5px;border-top:1px solid var(--bdr)"><div style="font-size:.6rem;color:var(--dim);margin-bottom:3px">Result:</div><div style="display:flex;gap:3px;flex-wrap:wrap">`;
+    step.arr.forEach((val,i)=>{
+      const style=i===activeEl?'border-color:var(--teal);color:var(--teal)':'border-color:var(--green);color:var(--green);background:rgba(34,197,94,.1)';
+      html+=`<span class="el" style="min-width:24px;height:24px;font-size:.72rem;${style}">${val}</span>`;
+    });
+    html+=`</div></div>`;
+  }
+  return html;
+}
+
+/* ─── RADIX: digit buckets with d,n,k vars ─── */
+function renderRadix(step){
+  const {arr,v}=step;
+  const {currExp,dbkts,activeEl,pass,n,d,k}=v;
+  const DNAMES=['ones','tens','hundreds','thousands'];
+  const expPos=currExp?Math.round(Math.log10(currExp)):0;
+  const dn=DNAMES[expPos]||`10^${expPos}`;
+  const maxLen=Math.max(...arr).toString().length;
+
+  let html=``;
+  // d, n, k vars
+  html+=`<div class="radix-vars">
+    <span class="radix-var"><span style="color:var(--acc2)">d</span> = <span style="color:var(--amber)">${d}</span><span style="color:var(--dim);font-size:.62rem"> digits</span></span>
+    <span class="radix-var"><span style="color:var(--acc2)">n</span> = <span style="color:var(--amber)">${n}</span><span style="color:var(--dim);font-size:.62rem"> elements</span></span>
+    <span class="radix-var"><span style="color:var(--acc2)">k</span> = <span style="color:var(--amber)">${k}</span><span style="color:var(--dim);font-size:.62rem"> base</span></span>
+    <span class="radix-var" style="color:var(--dim);font-size:.65rem">O(d(n+k)) = O(${d}×${n+k})</span>
+  </div>`;
+
+  if(pass>0&&pass<=d)html+=`<div style="font-size:.62rem;font-weight:700;color:var(--acc2);margin-bottom:5px">Pass ${pass} of ${d}: sort by <span style="color:var(--amber)">${dn}</span> digit</div>`;
+
+  // Array with highlighted digit
+  html+=`<div style="display:flex;gap:3px;flex-wrap:wrap;margin-bottom:8px">`;
+  arr.forEach((val,i)=>{
+    const isAct=(i===activeEl);
+    const sVal=val.toString().padStart(maxLen,'0');
+    const dIdx=sVal.length-1-expPos;
+    let inner='';
+    sVal.split('').forEach((ch,ci)=>{
+      if(ci===dIdx&&currExp!=null)inner+=`<span style="color:${isAct?'var(--amber)':'var(--acc)'};font-size:.85rem;font-weight:900">${ch}</span>`;
+      else inner+=`<span style="color:var(--dim);font-size:.7rem">${ch}</span>`;
+    });
+    html+=`<div class="digit-box" style="border-color:${isAct?'var(--amber)':'var(--bdr)'};background:${isAct?'rgba(245,158,11,.06)':'var(--s2)'};">${inner}</div>`;
+  });
+  html+=`</div>`;
+
+  // 10 digit buckets
+  if(dbkts){
+    html+=`<div style="display:flex;gap:4px;flex-wrap:wrap;overflow-x:auto">`;
+    dbkts.forEach((items,d2)=>{
+      const col=D10[d2%D10.length];
+      html+=`<div style="display:flex;flex-direction:column;align-items:center;gap:2px;min-width:28px">`;
+      html+=`<div class="dbkt-hdr" style="background:${col}">${d2}</div>`;
+      html+=`<div style="display:flex;flex-direction:column;gap:1px;min-height:20px">`;
+      items.forEach(vv=>{html+=`<div class="dbkt-item" style="border-color:${col}50;color:${col};background:${col}12">${vv}</div>`;});
+      html+=`</div></div>`;
+    });
+    html+=`</div>`;
+  }
+  return html;
+}
+
+// ════════ APP STATE ════════
+let cAlgo=0,cEx=0,cSteps=[],cStep=0,autoTmr=null,spd=700;
+
+function renderTabs(){
+  document.getElementById('tabs').innerHTML=ALGOS.map((a,i)=>`<div class="tab${i===cAlgo?' on':''}" onclick="switchAlgo(${i})">${a.name}</div>`).join('');
+}
+function renderInfo(){
+  const a=ALGOS[cAlgo];
+  document.getElementById('info').innerHTML=`
+    <div class="aname">${a.name}</div>
+    <div class="abadge">${a.type}</div>
+    <div class="cmpl">
+      <div class="cc"><div class="clb">Best</div><div class="cv">${a.best}</div></div>
+      <div class="cc"><div class="clb">Avg</div><div class="cv">${a.avg}</div></div>
+      <div class="cc"><div class="clb">Worst</div><div class="cv">${a.worst}</div></div>
+    </div>
+    <div class="cmpl">
+      <div class="cc"><div class="clb">Space</div><div class="cv">${a.space}</div></div>
+      <div class="cc" style="grid-column:span 2"><div class="clb">Stable?</div><div class="cv" style="color:${a.stable?'var(--green)':'var(--red)'}">${a.stable?'Yes ✓':'No ✗'}</div></div>
+    </div>
+    <div class="sec">What it does</div>
+    <div class="adesc">${a.desc}</div>
+    <div class="sec">How it works</div>
+    <ol class="hw">${a.steps.map(s=>`<li>${s}</li>`).join('')}</ol>
+    <div class="sec">Visualization guide</div>
+    <div class="keynote">${a.note}</div>
+  `;
+}
+function renderDemo(){
+  const a=ALGOS[cAlgo];
+  document.getElementById('demo').innerHTML=`
+    <div class="ex-row">
+      <span class="exlbl">Example:</span>
+      ${a.examples.map((ex,i)=>`<button class="ebtn${i===cEx?' on':''}" onclick="switchEx(${i})">Ex ${i+1}: [${ex.join(',')}]</button>`).join('')}
+    </div>
+    <div class="viz-box" id="vizBox"></div>
+    <div class="step-txt" id="stepTxt">Press Next ▶ to begin stepping through the algorithm.</div>
+    <div class="prog">
+      <span class="plbl" id="stepLbl">Step 0 / 0</span>
+      <div class="ptrack"><div class="pfill" id="pfill" style="width:0%"></div></div>
+    </div>
+    <div class="ctrls">
+      <button class="btn" onclick="doRestart()">↺</button>
+      <button class="btn" id="prevBtn" onclick="doPrev()">◀ Prev</button>
+      <button class="btn pri" id="nextBtn" onclick="doNext()">Next ▶</button>
+      <button class="btn" id="autoBtn" onclick="doAuto()">▶▶ Auto</button>
+      <div class="spd"><span>Speed</span><input type="range" min="80" max="1400" value="700" oninput="spd=1480-+this.value"></div>
+    </div>
+  `;
+  loadEx();
+}
+function loadEx(){
+  stopAuto();
+  cSteps=ALGOS[cAlgo].gen(ALGOS[cAlgo].examples[cEx]);
+  cStep=0;drawStep();
+}
+function drawStep(){
+  const s=cSteps[cStep]||cSteps[0];
+  const vb=document.getElementById('vizBox');
+  const st=document.getElementById('stepTxt');
+  const pf=document.getElementById('pfill');
+  const sl=document.getElementById('stepLbl');
+  const pb=document.getElementById('prevBtn');
+  const nb=document.getElementById('nextBtn');
+  if(vb)vb.innerHTML=renderViz(s);
+  if(st)st.textContent=s.desc||'';
+  const tot=cSteps.length-1;
+  if(pf)pf.style.width=(tot>0?cStep/tot*100:0)+'%';
+  if(sl)sl.textContent=`Step ${cStep} / ${tot}`;
+  if(pb)pb.disabled=cStep===0;
+  if(nb)nb.disabled=cStep>=cSteps.length-1;
+}
+function switchAlgo(i){stopAuto();cAlgo=i;cEx=0;renderTabs();renderInfo();renderDemo();}
+function switchEx(i){stopAuto();cEx=i;document.querySelectorAll('.ebtn').forEach((b,j)=>b.classList.toggle('on',j===i));loadEx();}
+function doRestart(){stopAuto();cStep=0;drawStep();}
+function doPrev(){if(cStep>0){cStep--;drawStep();}}
+function doNext(){if(cStep<cSteps.length-1){cStep++;drawStep();}}
+function doAuto(){
+  if(autoTmr){stopAuto();return;}
+  const btn=document.getElementById('autoBtn');
+  if(btn)btn.textContent='⏸';
+  autoTmr=setInterval(()=>{
+    if(cStep>=cSteps.length-1){stopAuto();return;}
+    cStep++;drawStep();
+  },spd);
+}
+function stopAuto(){
+  if(autoTmr){clearInterval(autoTmr);autoTmr=null;}
+  const btn=document.getElementById('autoBtn');
+  if(btn)btn.textContent='▶▶ Auto';
+}
+renderTabs();renderInfo();renderDemo();
+</script>
+</body>
+</html>
